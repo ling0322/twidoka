@@ -1,4 +1,4 @@
-package twidoka
+package main
 
 import (
   "net/http"
@@ -81,7 +81,7 @@ func errorHandler(w http.ResponseWriter, err error) {
   errorTemplate.Execute(w, err)
 }
 
-func init() {
+func main() {
   http.HandleFunc("/home", homeHandler)
   http.HandleFunc("/update", updateHandler)
   http.HandleFunc("/details", detailsHandler)
@@ -91,6 +91,8 @@ func init() {
   http.HandleFunc("/oauth_token", oauthTokenHandler)
   anaconda.SetConsumerKey(ConsumerKey)
   anaconda.SetConsumerSecret(ConsumerSecret)
+
+  http.ListenAndServe(":8080", nil)
 }
 
 func updateHandler(w http.ResponseWriter, r *http.Request) {

@@ -1,4 +1,4 @@
-package twidoka
+package main
 
 import (
   "net/http"
