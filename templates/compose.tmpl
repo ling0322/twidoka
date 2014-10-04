@@ -1,0 +1,20 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+{{ template "head.tmpl" }}
+<body>
+  {{ template "menu.tmpl" .}}
+  <div class="divspace">{{ .Type }}</div>
+  <div>----------</div>
+  {{ if .InReplyToTweet }}
+  {{ template "tweet.tmpl" .InReplyToTweet }}
+  <div>-- in relpy to &uarr; --</div>
+  {{ end }}
+  <form action="/update" method="post">
+    <div class="divspace"><textarea id="tweet-text" name="text" rows="4">{{ .DefaultText }}</textarea></div>
+    <div class="divspace"><button id="tweet-submit" type="submit">Post</button></div>
+    {{ if eq .Type "Reply" }}
+    <div><input name="in_reply_to" type="hidden" value="{{ .InReplyToTweet.Id }}" /></div>
+    {{ end }}
+  </form>
+</body>
+</html>

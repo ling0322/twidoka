@@ -1,0 +1,22 @@
+<div class="avatar">
+  <img src="{{ .ProfileImageUrl }}" />
+</div>
+
+<div class="content">
+  <div>
+    <a href="/user/{{ .ScreenName }}">{{ .ScreenName }}</a>({{ .Name }})
+    {{ if .ShowOperator }}
+    <a href="/reply?id={{ .Id }}">@</a>
+    <a href="/retweet?id={{ .Id }}">RT</a>
+    <a href="/details?id={{ .Id }}">Details</a>
+    {{ if .ShowRemove }}
+    <a href="/remove?id={{ .Id }}">RM</a>
+    {{ end }}
+    {{ end }}
+  </div>
+  <div>{{ .Text }}</div>
+  <div>
+    {{ .CreateTime }} via {{ .Source }}
+  </div>
+</div>
+<div style="clear: both;"></div>

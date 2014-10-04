@@ -1,0 +1,19 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+{{ template "head.tmpl" }}
+<body>
+  {{ template "menu.tmpl" .}}
+  <form action="/update" method="post">
+    <div class="divspace"><textarea id="tweet-text" name="text" rows="4"></textarea></div>
+    <div class="divspace"><button id="tweet-submit" type="submit">Post</button></div>
+  </form>
+  <div class="divspace">{{ .Title }}</div>
+  <div>----------</div>
+  <div>{{ template "tweet_list.tmpl" .Tweets }}</div>
+  {{ if ge .PreviousPage 0 }}
+  <a href="/">&laquo; Back </a>
+  <span>|</span>
+  {{ end }}
+  <a href="?page={{ .NextPage }}&max_id={{ .SinceId }}"> Older &raquo; </a>
+</body>
+</html>
