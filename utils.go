@@ -11,6 +11,12 @@ import (
   "strings"
 )
 
+func partialHandler(handler func(string, http.ResponseWriter, *http.Request), handlerType string) func(http.ResponseWriter, *http.Request) {
+  return func(w http.ResponseWriter, r *http.Request) {
+    handler(handlerType, w, r)
+  }
+}
+
 func buildAnacondaApiFromRequest(r *http.Request) *anaconda.TwitterApi {
   token := getCookie(r, "access_token")
   secret := getCookie(r, "access_token_secret")
@@ -51,6 +57,22 @@ func tweetTextHtml(t *anaconda.Tweet) string {
   }
 
   return html
+}
+
+func convertToUserView(u *anaconda.User) *userView {
+  user := new(userView)
+  user.ProfileImageUrl = u.ProfileImageURL
+  user.ScreenName = u.ScreenName
+  user.Name = u.Name
+  user.Description = u.Description
+  user.FriendsCount = u.FriendsCount
+  user.FollowersCount = u.FollowersCount
+  user.StatusesCount = u.StatusesCount
+  user.Location = u.Location
+  user.Following = u.Following
+  createdAt, _ := time.Parse(time.RubyDate, u.CreatedAt)
+  user.CreatedAt = timeToReadableString(createdAt)
+  return user
 }
 
 func convertToTweetView(t *anaconda.Tweet, screenName string, showOperator bool) *tweetView {

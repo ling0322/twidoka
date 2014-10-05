@@ -7,7 +7,7 @@ import (
   "fmt"
   // "time"
   "github.com/garyburd/go-oauth/oauth"
-  "html/template"
+  // "html/template"
   "strconv"
   // "log"
 )
@@ -17,72 +17,17 @@ const (
   RetrieveCount = 200
 )
 
-type timelineView struct {
-  Title string
-  ScreenName string
-  PreviousPage int
-  NextPage int
-  SinceId int64
-  Tweets []*tweetView
-}
-
-type tweetView struct {
-  ScreenName string
-  Name string
-  InReplyToStatusId int64
-  Id int64
-  ProfileImageUrl string
-  Text template.HTML
-  ShowRemove bool
-  ShowOperator bool
-  CreateTime string
-  Source template.HTML
-}
-
-type detailsView struct {
-  InReplyTo *tweetView
-  Tweet *tweetView
-  ImageUrl string
-  ScreenName string
-}
-
-type composeView struct {
-  InReplyToTweet *tweetView
-  ScreenName string
-  DefaultText string
-  Type string
-}
-
-var homeTemplate = template.Must(template.ParseFiles(
-    "templates/madoka.tmpl",
-    "templates/menu.tmpl",
-    "templates/tweet_list.tmpl",
-    "templates/head.tmpl",
-    "templates/tweet.tmpl"))
-
-var detailsTemplate = template.Must(template.ParseFiles(
-    "templates/details.tmpl",
-    "templates/menu.tmpl",
-    "templates/head.tmpl",
-    "templates/tweet.tmpl"))
-
-var composeTemplate = template.Must(template.ParseFiles(
-    "templates/compose.tmpl",
-    "templates/menu.tmpl",
-    "templates/head.tmpl",
-    "templates/tweet.tmpl"))
-
-var errorTemplate = template.Must(template.ParseFiles(
-    "templates/error.tmpl",
-    "templates/head.tmpl"))
-
 func errorHandler(w http.ResponseWriter, err error) {
   w.WriteHeader(http.StatusInternalServerError)
   errorTemplate.Execute(w, err)
 }
 
 func main() {
-  http.HandleFunc("/home", homeHandler)
+  http.HandleFunc("/", partialHandler(timelineHandler, "Home"))
+  http.HandleFunc("/mentions", partialHandler(timelineHandler, "Mentions"))
+  http.HandleFunc("/user", partialHandler(timelineHandler, "User"))
+  http.HandleFunc("/signin", signInHandler)
+  http.HandleFunc("/oauth_signin", oauthSignInHandler)
   http.HandleFunc("/update", updateHandler)
   http.HandleFunc("/details", detailsHandler)
   http.HandleFunc("/reply", replyHandler)
@@ -93,6 +38,10 @@ func main() {
   anaconda.SetConsumerSecret(ConsumerSecret)
 
   http.ListenAndServe(":8080", nil)
+}
+
+func signInHandler(w http.ResponseWriter, r *http.Request) {
+  signInTemplate.Execute(w, nil)
 }
 
 func updateHandler(w http.ResponseWriter, r *http.Request) {
@@ -180,34 +129,56 @@ func detailsHandler(w http.ResponseWriter, r *http.Request) {
   }
 }
 
-func homeHandler(w http.ResponseWriter, r *http.Request) {
+func timelineHandler(timelineType string, w http.ResponseWriter, r *http.Request) {
   screenName := getCookie(r, "screen_name")
   page, _ := strconv.Atoi(r.FormValue("page"))
   api := buildAnacondaApiFromRequest(r)
-
-  fmt.Println(r.Host)
-
   values := buildTimelineRequestValues(r)
 
+  // Only in user timeline mode
+  userScreenName := r.FormValue("u")
+
   // Gets the timeline from twitter.com
-  timeline, err := api.GetHomeTimeline(values)
-  tweetViews := make([]*tweetView, len(timeline))
-  for i := range timeline {
-    tweetViews[i] = convertToTweetView(&timeline[i], screenName, true)
+  var err error
+  var timeline []anaconda.Tweet
+  switch timelineType {
+  case "Home":
+    timeline, err = api.GetHomeTimeline(values)
+  case "Mentions":
+    timeline, err = api.GetMentionsTimeline(values)
+  case "User":
+    values.Add("screen_name", userScreenName)
+    timeline, err = api.GetUserTimeline(values)
   }
 
-  var lastId int64
-  if len(timeline) > 0 {
-    lastId = timeline[len(timeline) - 1].Id
+  // Only in user timeline mode
+  var userInf anaconda.User
+  var user *userView
+  if err == nil && timelineType == "User" {
+    userInf, err = api.GetUsersShow(userScreenName, url.Values{})
+  }
+  if err == nil && timelineType == "User" {
+    user = convertToUserView(&userInf)
   }
 
   if err == nil {
-    err = homeTemplate.Execute(w, &timelineView{
-        Title: "Home",
+    tweetViews := make([]*tweetView, len(timeline))
+    for i := range timeline {
+      tweetViews[i] = convertToTweetView(&timeline[i], screenName, true)
+    }
+
+    var lastId int64
+    if len(timeline) > 0 {
+      lastId = timeline[len(timeline) - 1].Id
+    }
+
+    timelineTemplate.Execute(w, &timelineView{
+        Title: timelineType,
         ScreenName: screenName,
         PreviousPage: page - 1,
         NextPage: page + 1,
         SinceId: lastId,
+        User: user,
         Tweets: tweetViews})
   }
 
@@ -224,6 +195,33 @@ func authorizeHandler(w http.ResponseWriter, r *http.Request) {
     setCookie(w, "access_token", credentials.Token)
     setCookie(w, "access_token_secret", credentials.Secret)
     http.Redirect(w, r, authUrl, http.StatusFound)
+  }
+}
+
+func oauthSignInHandler(w http.ResponseWriter, r *http.Request) {
+  username := r.FormValue("user")
+  password := r.FormValue("passwd")
+
+  var err error
+  authUrl, credentials, err := anaconda.AuthorizationURL(SiteURL + "/oauth_token")
+
+  var authenticityToken string
+  if err == nil {
+    setCookie(w, "access_token", credentials.Token)
+    setCookie(w, "access_token_secret", credentials.Secret)
+    authenticityToken, err = getAuthenticityToken(authUrl)
+  }
+
+  var verifier string
+  if err == nil {
+    verifier, err = loginAndGetVerifier(username, password, credentials.Token, authenticityToken)
+  }
+
+  if err == nil {
+    oauthTokenUrl := fmt.Sprintf("%s/oauth_token?oauth_verifier=%s", SiteURL, verifier)
+    http.Redirect(w, r, oauthTokenUrl, http.StatusFound)
+  } else {
+    errorHandler(w, err)
   }
 }
 

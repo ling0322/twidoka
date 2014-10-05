@@ -2,8 +2,8 @@ body {
     font-family: "Times", "Lucida Grande", "Lucida Sans Unicode", Verdana, Helvetica, Arial, sans-serif;
     font-size: 16px;
     margin: 5px;
-    word-wrap: break-word; 
-    word-break: break-all; 
+    word-wrap: break-word;
+    word-break: break-all;
 }
 
 .divspace {
@@ -30,6 +30,10 @@ a:hover {
     text-decoration: underline;
 }
 
+
+.tweet {
+    margin: 20px 0;
+}
 .avatar {
     padding: 3px 0;
     float: left;
@@ -42,6 +46,17 @@ a:hover {
 }
 .content-text {
     padding: 5px 0;
+}
+
+.signin-text {
+    font-size: 16px;
+    margin: 0px;
+    padding: 0px;
+    width: 100%;
+}
+
+input {
+    font-family: "Times", "Lucida Grande", "Lucida Sans Unicode", Verdana, Helvetica, Arial, sans-serif;
 }
 
 #tweet-text {

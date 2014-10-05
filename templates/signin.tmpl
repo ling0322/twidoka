@@ -1,0 +1,19 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+{{ template "head.tmpl" }}
+<body>
+  <div>Twidoka - Sign In</div>
+  <div class="divspace"><a href="/authorize"><img src="/static/sign-in.png" /></a></div>
+  <hr />
+  <div class="divspace">Or sign in directly</div>
+  <div class="divspace">
+    <form action="/oauth_signin" method="post">
+      <div><label>Twitter username:</label></div>
+      <div><input class="signin-text" name="user" required="required" type="text" /></div>
+      <div><label>Password:</label></div>
+      <div><input class="signin-text" name="passwd" type="password" /></div>
+      <div><input id ="tweet-submit" type="submit" value="Sign In"></div>
+    </form>
+  </div>
+</body>
+</html>
