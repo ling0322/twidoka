@@ -185,6 +185,8 @@ func homeHandler(w http.ResponseWriter, r *http.Request) {
   page, _ := strconv.Atoi(r.FormValue("page"))
   api := buildAnacondaApiFromRequest(r)
 
+  fmt.Println(r.Host)
+
   values := buildTimelineRequestValues(r)
 
   // Gets the timeline from twitter.com
