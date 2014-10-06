@@ -14,7 +14,7 @@
   {{ else }}
   <div class="divspace">{{ .Title }}</div>
   {{ end }}
-  <div>----------</div>
+  <hr />
   <div>{{ template "tweet_list.tmpl" .Tweets }}</div>
   {{ if ge .PreviousPage 0 }}
   <a href="/">&laquo; Back </a>

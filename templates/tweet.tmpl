@@ -6,6 +6,10 @@
   <div class="content">
     <div>
       <a href="/user?u={{ .ScreenName }}">{{ .ScreenName }}</a>({{ .Name }})
+    </div>
+    <div class="content-text">{{ .Text }}</div>
+    <div class="content-via">{{ .CreateTime }} via {{ .Source }}</div>
+    <div>
       {{ if .ShowOperator }}
       <a href="/reply?id={{ .Id }}">@</a>
       <a href="/retweet?id={{ .Id }}">RT</a>
@@ -14,10 +18,6 @@
       <a href="/remove?id={{ .Id }}">RM</a>
       {{ end }}
       {{ end }}
-    </div>
-    <div class="content-text">{{ .Text }}</div>
-    <div>
-      {{ .CreateTime }} via {{ .Source }}
     </div>
   </div>
   <div style="clear: both;"></div>
