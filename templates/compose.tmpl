@@ -3,8 +3,6 @@
 {{ template "head.tmpl" }}
 <body>
   {{ template "menu.tmpl" .}}
-  <div class="divspace">{{ .Type }}</div>
-  <div>----------</div>
   {{ if .InReplyToTweet }}
   {{ template "tweet.tmpl" .InReplyToTweet }}
   <div>-- in relpy to &uarr; --</div>

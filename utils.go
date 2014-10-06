@@ -11,7 +11,48 @@ import (
   "strings"
 )
 
-func partialHandler(handler func(string, http.ResponseWriter, *http.Request), handlerType string) func(http.ResponseWriter, *http.Request) {
+type notFoundError struct {
+}
+func (e *notFoundError) Error() string {
+  return "Page not found"
+}
+
+func errorHandler(w http.ResponseWriter, err error) {
+  var errno int
+  switch err.(type) {
+  case *notFoundError:
+    errno = http.StatusNotFound
+  default:
+    errno = http.StatusInternalServerError
+  }
+
+  w.WriteHeader(errno)
+  errorTemplate.Execute(w, err)
+}
+
+func root(handler func(http.ResponseWriter, *http.Request)) func(http.ResponseWriter, *http.Request) {
+  return func(w http.ResponseWriter, r *http.Request) {
+    path := r.URL.Path
+    if path != "/" {
+      errorHandler(w, &notFoundError{})
+    } else {
+      handler(w, r)
+    }
+  }
+}
+
+func signinRequired(handler func(http.ResponseWriter, *http.Request)) func(http.ResponseWriter, *http.Request) {
+  return func(w http.ResponseWriter, r *http.Request) {
+    token := getCookie(r, "access_token")
+    if token == "" {
+      http.Redirect(w, r, "/signin", http.StatusFound)
+    } else {
+      handler(w, r)
+    }
+  }
+}
+
+func partial(handler func(string, http.ResponseWriter, *http.Request), handlerType string) func(http.ResponseWriter, *http.Request) {
   return func(w http.ResponseWriter, r *http.Request) {
     handler(handlerType, w, r)
   }

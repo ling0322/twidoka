@@ -17,20 +17,18 @@ const (
   RetrieveCount = 200
 )
 
-func errorHandler(w http.ResponseWriter, err error) {
-  w.WriteHeader(http.StatusInternalServerError)
-  errorTemplate.Execute(w, err)
-}
-
 func main() {
-  http.HandleFunc("/", partialHandler(timelineHandler, "Home"))
-  http.HandleFunc("/mentions", partialHandler(timelineHandler, "Mentions"))
-  http.HandleFunc("/user", partialHandler(timelineHandler, "User"))
+  http.HandleFunc("/", root(signinRequired(partial(timelineHandler, "Home"))))
+  http.HandleFunc("/mentions", signinRequired(partial(timelineHandler, "Mentions")))
+  http.HandleFunc("/user", signinRequired(partial(timelineHandler, "User")))
   http.HandleFunc("/signin", signInHandler)
   http.HandleFunc("/oauth_signin", oauthSignInHandler)
-  http.HandleFunc("/update", updateHandler)
-  http.HandleFunc("/details", detailsHandler)
-  http.HandleFunc("/reply", replyHandler)
+  http.HandleFunc("/update", signinRequired(updateHandler))
+  http.HandleFunc("/details", signinRequired(detailsHandler))
+  http.HandleFunc("/reply", signinRequired(partial(composeHandler, "Reply")))
+  http.HandleFunc("/retweet", signinRequired(partial(composeHandler, "Retweet")))
+  http.HandleFunc("/compose", signinRequired(partial(composeHandler, "Compose")))
+  http.HandleFunc("/remove", signinRequired(removeHandler))
   http.HandleFunc("/authorize", authorizeHandler)
   http.Handle("/static/", http.FileServer(http.Dir(".")))
   http.HandleFunc("/oauth_token", oauthTokenHandler)
@@ -38,6 +36,39 @@ func main() {
   anaconda.SetConsumerSecret(ConsumerSecret)
 
   http.ListenAndServe(":8080", nil)
+}
+
+func removeHandler(w http.ResponseWriter, r *http.Request) {
+  var err error
+  id, err := strconv.ParseInt(r.FormValue("id"), 10, 64)
+  confirm := r.FormValue("confirm")
+  screenName := getCookie(r, "screen_name")
+  api := buildAnacondaApiFromRequest(r)
+
+  if confirm == "" {
+    // Not yet confirmed
+    var tweet anaconda.Tweet
+    if err == nil {
+      tweet, err = api.GetTweet(id, url.Values{})
+    }
+    if err == nil {
+      view := convertToTweetView(&tweet, screenName, true)
+      fmt.Println(view)
+      removeTemplate.Execute(w, &removeView{Tweet: view})
+    }
+  } else {
+    // Confirmed, remove it!
+    if err == nil {
+      _, err = api.DeleteTweet(id, true)
+    }
+    if err == nil {
+      http.Redirect(w, r, "/", http.StatusFound)
+    }
+  }
+
+  if err != nil {
+    errorHandler(w, err)
+  }
 }
 
 func signInHandler(w http.ResponseWriter, r *http.Request) {
@@ -56,32 +87,41 @@ func updateHandler(w http.ResponseWriter, r *http.Request) {
   }
 
   _, err := api.PostTweet(text, values)
-  if err != nil {
+  if err == nil {
+    http.Redirect(w, r, "/", http.StatusFound)
+  } else {
     errorHandler(w, err)
   }
 }
 
-func replyHandler(w http.ResponseWriter, r *http.Request) {
+func composeHandler(composeType string, w http.ResponseWriter, r *http.Request) {
   screenName := getCookie(r, "screen_name")
   api := buildAnacondaApiFromRequest(r)
 
   var err error
-  id, err := strconv.ParseInt(r.FormValue("id"), 10, 64)
-
+  var id int64
   var tweet anaconda.Tweet
-  if err == nil {
-    tweet, err = api.GetTweet(id, url.Values{})
+  if composeType != "Compose" {
+    id, err = strconv.ParseInt(r.FormValue("id"), 10, 64)
+    if err == nil {
+      tweet, err = api.GetTweet(id, url.Values{})
+    }
   }
 
-  var view *tweetView
-  var compose *composeView
   if err == nil {
-    view = convertToTweetView(&tweet, screenName, true)
-    compose = new(composeView)
-    compose.InReplyToTweet = view
+    view := convertToTweetView(&tweet, screenName, true)
+    compose := new(composeView)
     compose.ScreenName = screenName
-    compose.DefaultText = fmt.Sprintf("@%s: ", view.ScreenName)
-    compose.Type = "Reply"
+    switch composeType {
+    case "Compose":
+      compose.DefaultText = ""
+    case "Reply":
+      compose.DefaultText = fmt.Sprintf("@%s: ", view.ScreenName)
+      compose.InReplyToTweet = view
+    case "Retweet":
+      compose.DefaultText = fmt.Sprintf(" RT @%s: %s", view.ScreenName, tweet.Text)
+    }
+    compose.Type = composeType
     composeTemplate.Execute(w, compose)
   }
 

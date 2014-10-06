@@ -3,23 +3,17 @@
 {{ template "head.tmpl" }}
 <body>
   {{ template "menu.tmpl" .}}
-  {{ if eq .Title "Home" }}
-  <form action="/update" method="post">
-    <div class="divspace"><textarea id="tweet-text" name="text" rows="4"></textarea></div>
-    <div class="divspace"><input id="tweet-submit" type="submit" /></div>
-  </form>
-  {{ end }}
-  {{ if eq .Title "User" }}
-  {{ template "userinfo.tmpl" .User }}
-  {{ else }}
-  <div class="divspace">{{ .Title }}</div>
-  {{ end }}
-  <hr />
-  <div>{{ template "tweet_list.tmpl" .Tweets }}</div>
-  {{ if ge .PreviousPage 0 }}
-  <a href="/">&laquo; Back </a>
-  <span>|</span>
-  {{ end }}
-  <a href="?page={{ .NextPage }}&max_id={{ .SinceId }}"> Older &raquo; </a>
+  <div class="c1">
+    {{ if eq .Title "User" }}
+    {{ template "userinfo.tmpl" .User }}
+    <hr />
+    {{ end }}
+    <div>{{ template "tweet_list.tmpl" .Tweets }}</div>
+    {{ if ge .PreviousPage 0 }}
+    <a href="/">&laquo; Back </a>
+    <span>|</span>
+    {{ end }}
+    <a href="?page={{ .NextPage }}&max_id={{ .SinceId }}"> Older &raquo; </a>
+  </div>
 </body>
 </html>

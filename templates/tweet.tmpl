@@ -8,8 +8,8 @@
       <a href="/user?u={{ .ScreenName }}">{{ .ScreenName }}</a>({{ .Name }})
     </div>
     <div class="content-text">{{ .Text }}</div>
-    <div class="content-via">{{ .CreateTime }} via {{ .Source }}</div>
     <div>
+      {{ .CreateTime }}
       {{ if .ShowOperator }}
       <a href="/reply?id={{ .Id }}">@</a>
       <a href="/retweet?id={{ .Id }}">RT</a>

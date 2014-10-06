@@ -54,6 +54,10 @@ type userView struct {
   CreatedAt string
 }
 
+type removeView struct {
+  Tweet *tweetView
+}
+
 var timelineTemplate = template.Must(template.ParseFiles(
     "templates/madoka.tmpl",
     "templates/menu.tmpl",
@@ -80,4 +84,10 @@ var errorTemplate = template.Must(template.ParseFiles(
 
 var signInTemplate = template.Must(template.ParseFiles(
     "templates/signin.tmpl",
+    "templates/head.tmpl"))
+
+var removeTemplate = template.Must(template.ParseFiles(
+    "templates/remove.tmpl",
+    "templates/menu.tmpl",
+    "templates/tweet.tmpl",
     "templates/head.tmpl"))

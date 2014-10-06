@@ -1,9 +1,9 @@
 body {
     font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
     font-size: 15px;
-    margin: 5px;
     word-wrap: break-word;
     word-break: break-all;
+    margin: 0;
 }
 
 .divspace {
@@ -45,12 +45,7 @@ a:hover {
     margin-left: 60px;
 }
 .content-text {
-    padding-top: 5px;
-}
-.content-via {
-    font-size: 13px;
-    padding-top: 2px;
-    padding-bottom: 5px;
+    padding: 2px 0;
 }
 
 .signin-text {
@@ -76,10 +71,29 @@ input {
     padding: 0px;
 }
 
-		
 hr {
     border: 0;
     height: 0;
     border-top: 1px solid rgba(0, 0, 0, 0.1);
     border-bottom: 1px solid rgba(255, 255, 255, 0.3);
+}
+
+.menu {
+    position: fixed;
+    width: 100%;
+    background-color: white;
+    line-height: 32px;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.2);
+}
+
+.menu a {
+    padding: 0 5px;
+}
+
+.menu-place {
+    height: 32px;
+}
+
+.c1 {
+    padding: 5px;
 }
