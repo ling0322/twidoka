@@ -86,13 +86,16 @@ hr {
 
 .menu {
     position: fixed;
-    width: 100%;
+    left: 0;
+    right: 0;
     background-color: white;
+    height: 32px;
     line-height: 32px;
     border-bottom: 1px solid rgba(0, 0, 0, 0.2);
 }
 
 .menu a {
+    font-size: 15px;
     padding: 0 5px;
 }
 
