@@ -1,0 +1,13 @@
+<form action="/search" method="post">
+  <div class="input-group">
+    <input name="q" type="text" class="form-control" placeholder="Search Twitter" value="{{ . }}">
+    <span class="input-group-btn">
+      <button class="btn btn-default" type="submit">Search</button>
+    </span>
+  </div><!-- /input-group -->
+  {{ if ne . "" }}
+  <div>&nbsp;</div>
+  Results for '{{ . }}'
+  <hr />
+  {{ end }}
+</form>

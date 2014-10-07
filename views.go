@@ -7,10 +7,10 @@ import (
 type timelineView struct {
   Title string
   ScreenName string
-  PreviousPage int
-  NextPage int
   SinceId int64
   User *userView
+  Search string
+  Referer string
   Tweets []*tweetView
 }
 
@@ -24,7 +24,9 @@ type tweetView struct {
   ShowRemove bool
   ShowOperator bool
   CreateTime string
+  ImageUrl string
   Source template.HTML
+  ShowFull bool
 }
 
 type detailsView struct {
@@ -39,6 +41,7 @@ type composeView struct {
   ScreenName string
   DefaultText string
   Type string
+  Referer string
 }
 
 type userView struct {
@@ -56,6 +59,7 @@ type userView struct {
 
 type removeView struct {
   Tweet *tweetView
+  Referer string
 }
 
 var timelineTemplate = template.Must(template.ParseFiles(
@@ -63,6 +67,7 @@ var timelineTemplate = template.Must(template.ParseFiles(
     "templates/menu.tmpl",
     "templates/userinfo.tmpl",
     "templates/tweet_list.tmpl",
+    "templates/searchbox.tmpl",
     "templates/head.tmpl",
     "templates/tweet.tmpl"))
 
@@ -80,6 +85,7 @@ var composeTemplate = template.Must(template.ParseFiles(
 
 var errorTemplate = template.Must(template.ParseFiles(
     "templates/error.tmpl",
+    "templates/menu.tmpl",
     "templates/head.tmpl"))
 
 var signInTemplate = template.Must(template.ParseFiles(

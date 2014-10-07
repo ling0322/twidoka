@@ -8,6 +8,12 @@
       <a href="/user?u={{ .ScreenName }}">{{ .ScreenName }}</a>({{ .Name }})
     </div>
     <div class="content-text">{{ .Text }}</div>
+    {{ if eq .ShowFull true }}
+    {{ if ne .ImageUrl "" }}
+    <img src="{{ .ImageUrl }}" />
+    {{ end }}
+    <div>via {{ .Source }}</div>
+    {{ end }}
     <div>
       {{ .CreateTime }}
       {{ if .ShowOperator }}
@@ -19,6 +25,7 @@
       {{ end }}
       {{ end }}
     </div>
+
   </div>
   <div style="clear: both;"></div>
 </div>

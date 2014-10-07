@@ -2,16 +2,15 @@
 <html xmlns="http://www.w3.org/1999/xhtml">
 {{ template "head.tmpl" }}
 <body>
-  {{ template "menu.tmpl" .}}
-  <div class="divspace">Details:</div>
-  <div>----------</div>
-  {{ if .InReplyTo }}
-  <div>{{ template "tweet.tmpl" .InReplyTo }}</div>
-  <div>-- in relpy to &uarr; --</div>
-  {{ end }}
-  <div>
-  {{ template "tweet.tmpl" .Tweet }}
+  {{ template "menu.tmpl" "Details"}}
+  <div class="c1">
+    {{ if .InReplyTo }}
+    <div>{{ template "tweet.tmpl" .InReplyTo }}</div>
+    <div class="in_reply_to">-- in relpy to &uarr; --</div>
+    {{ end }}
+    <div>
+    {{ template "tweet.tmpl" .Tweet }}
+    </div>
   </div>
-  <div>via {{ .Tweet.Source }}</div>
 </body>
 </html>

@@ -2,18 +2,29 @@
 <html xmlns="http://www.w3.org/1999/xhtml">
 {{ template "head.tmpl" }}
 <body>
-  {{ template "menu.tmpl" .}}
+  {{ template "menu.tmpl" .Title}}
   <div class="c1">
+    {{ if eq .Title "Home" }}
+    Home Timeline - <a href="/">Refresh</a>
+    <hr />
+    {{ end }}
+    {{ if eq .Title "Mentions" }}
+    Mentions - <a href="/mentions">Refresh</a>
+    <hr />
+    {{ end }}
     {{ if eq .Title "User" }}
     {{ template "userinfo.tmpl" .User }}
     <hr />
     {{ end }}
-    <div>{{ template "tweet_list.tmpl" .Tweets }}</div>
-    {{ if ge .PreviousPage 0 }}
-    <a href="/">&laquo; Back </a>
-    <span>|</span>
+    {{ if eq .Title "Search" }}
+    {{ template "searchbox.tmpl" .Search }}
     {{ end }}
-    <a href="?page={{ .NextPage }}&max_id={{ .SinceId }}"> Older &raquo; </a>
+    {{ if or (ne .Title "Search") (ne .Search "") }}
+    <div>{{ template "tweet_list.tmpl" .Tweets }}</div>
+    {{ end }}
+    {{ if ne (len .Tweets) 0 }}
+    <a href="?max_id={{ .SinceId }}{{ if eq .Title "Search" }}&q={{ .Search }}{{end}}{{ if eq .Title "User" }}&u={{ .User.ScreenName }}{{ end }}"> Older &raquo; </a>
+    {{ end }}
   </div>
 </body>
 </html>

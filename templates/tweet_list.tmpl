@@ -1,4 +1,8 @@
+{{ if gt (len .) 0 }}
 {{ range . }}
 {{ template "tweet.tmpl" . }}
 <hr />
+{{ end }}
+{{ else }}
+<div class="divspace">No tweets</div>
 {{ end }}

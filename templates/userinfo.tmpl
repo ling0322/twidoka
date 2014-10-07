@@ -1,13 +1,10 @@
-<div><img src="{{ .ProfileImageUrl }}" /></div>
-<div><a href="/user?n={{ .ScreenName }}">@{{ .ScreenName }}</a>({{ .Name }})</div>
-<div>Bio: {{ .Description }}</div>
-<div>Friends: {{ .FriendsCount }}&nbsp;&nbsp;Followers: {{ .FollowersCount }}&nbsp;&nbsp;Statuses: {{ .StatusesCount }}</div>
-<div>Location: {{ .Location }}</div>
-<div>Created at: {{ .CreatedAt }}</div>
-<div>
-  {{ if eq .Following true }}
-  <span><a href="/follow/{{ .ScreenName }}">Follow</a></span>
-  {{ else }}
-  <span><a href="/unfollow/{{ .ScreenName }}">Unfollow</a></span>
-  {{ end }}
+<div class="userinfo">
+  <p><img src="{{ .ProfileImageUrl }}" /></p>
+  <p><a href="/user?n={{ .ScreenName }}">@{{ .ScreenName }}</a>({{ .Name }})</p>
+  <p>Bio: {{ .Description }}</p>
+  <p>Friends: {{ .FriendsCount }}</p>
+  <p>Followers: {{ .FollowersCount }}</p>
+  <p>Tweets: {{ .StatusesCount }}</p>
+  <p>Location: {{ .Location }}</p>
+  <p>Created at: {{ .CreatedAt }}</p>
 </div>

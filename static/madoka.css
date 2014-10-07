@@ -1,6 +1,7 @@
 body {
     font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
     font-size: 15px;
+    line-height: 16px;
     word-wrap: break-word;
     word-break: break-all;
     margin: 0;
@@ -30,6 +31,9 @@ a:hover {
     text-decoration: underline;
 }
 
+p {
+    margin: 0;
+}
 
 .tweet {
     margin: 10px 0;
@@ -74,6 +78,8 @@ input {
 hr {
     border: 0;
     height: 0;
+    margin: 0;
+    padding: 0;
     border-top: 1px solid rgba(0, 0, 0, 0.1);
     border-bottom: 1px solid rgba(255, 255, 255, 0.3);
 }
@@ -95,5 +101,33 @@ hr {
 }
 
 .c1 {
-    padding: 5px;
+    padding: 10px 5px;
+    width: 640px;
+    margin: 0 auto;
+}
+
+@media only screen and (max-width: 640px) {
+.c1 {
+    width: 100%;
+    margin: 0 0;
+}
+}
+
+.in_reply_to {
+    font-size: 12px;
+    line-height: 12px;
+    color: #888;
+}
+
+.userinfo {
+    padding-top: 3px;
+    padding-bottom: 10px;
+}
+
+.form-group {
+    margin-bottom: 5px;
+}
+
+.content img {
+    max-width: 100%;
 }

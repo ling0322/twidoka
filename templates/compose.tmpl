@@ -2,17 +2,29 @@
 <html xmlns="http://www.w3.org/1999/xhtml">
 {{ template "head.tmpl" }}
 <body>
-  {{ template "menu.tmpl" .}}
-  {{ if .InReplyToTweet }}
-  {{ template "tweet.tmpl" .InReplyToTweet }}
-  <div>-- in relpy to &uarr; --</div>
-  {{ end }}
-  <form action="/update" method="post">
-    <div class="divspace"><textarea id="tweet-text" name="text" rows="4">{{ .DefaultText }}</textarea></div>
-    <div class="divspace"><input id="tweet-submit" type="submit">Post</input></div>
-    {{ if eq .Type "Reply" }}
-    <div><input name="in_reply_to" type="hidden" value="{{ .InReplyToTweet.Id }}" /></div>
+  {{ template "menu.tmpl" .Type}}
+  <div class="c1">
+    {{ if eq .Type "Compose" }}
+    Compose new Tweet
+    {{ else }}
+    {{ .Type }}
     {{ end }}
-  </form>
+    <hr />
+    {{ if .InReplyToTweet }}
+    {{ template "tweet.tmpl" .InReplyToTweet }}
+    <div class="in_reply_to">-- in relpy to &uarr; --</div>
+    {{ end }}
+    <form action="/update" method="post">
+      <div class="divspace"><textarea class="form-control" name="text" rows="4">{{ .DefaultText }}</textarea></div>
+      <div class="divspace">
+        <button type="submit" class="btn btn-primary">Tweet</button>
+        <a href="{{ .Referer }}"><button type="button" class="btn btn-default">Cancel</button></a>
+      </div>
+      <input name="in_reply_to" type="hidden" value="{{ .Referer }}" />
+      {{ if eq .Type "Reply" }}
+      <input name="in_reply_to" type="hidden" value="{{ .InReplyToTweet.Id }}" />
+      {{ end }}
+    </form>
+  </div>
 </body>
 </html>

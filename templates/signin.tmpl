@@ -2,18 +2,24 @@
 <html xmlns="http://www.w3.org/1999/xhtml">
 {{ template "head.tmpl" }}
 <body>
-  <div>Twidoka - Sign In</div>
+  <div class="c1">
+  <h1>Twidoka</h1>
   <div class="divspace"><a href="/authorize"><img src="/static/sign-in.png" /></a></div>
-  <hr />
-  <div class="divspace">Or sign in directly</div>
+  <div class="divspace"><hr /></div>
+  <div class="divspace">Or sign in directly:</div>
   <div class="divspace">
     <form action="/oauth_signin" method="post">
-      <div><label>Twitter username:</label></div>
-      <div><input class="signin-text" name="user" required="required" type="text" /></div>
-      <div><label>Password:</label></div>
-      <div><input class="signin-text" name="passwd" type="password" /></div>
-      <div><input id ="tweet-submit" type="submit" value="Sign In"></div>
+      <div class="form-group">
+        <label for="username">Twitter username</label>
+        <input type="text" class="form-control" id="username" name="user" placeholder="Username">
+      </div>
+      <div class="form-group">
+        <label for="password">Password</label>
+        <input type="password" class="form-control" id="password" name="passwd" placeholder="Password">
+      </div>
+      <div><button type="submit" class="btn btn-default">Sign In</button></div>
     </form>
+  </div>
   </div>
 </body>
 </html>

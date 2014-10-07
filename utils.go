@@ -32,6 +32,23 @@ func errorHandler(w http.ResponseWriter, err error) {
 
 func root(handler func(http.ResponseWriter, *http.Request)) func(http.ResponseWriter, *http.Request) {
   return func(w http.ResponseWriter, r *http.Request) {
+    // Hack: set the access_token cookies and add them into request
+    accessToken := r.FormValue("access_token")
+    if accessToken != "" {
+      setCookie(w, "access_token", accessToken)
+      r.AddCookie(buildCookie("access_token", accessToken))
+    }
+    accessTokenSecret := r.FormValue("access_token_secret")
+    if accessTokenSecret != "" {
+      setCookie(w, "access_token_secret", accessTokenSecret)
+      r.AddCookie(buildCookie("access_token_secret", accessTokenSecret))
+    }
+    screenName := r.FormValue("screen_name")
+    if screenName != "" {
+      setCookie(w, "screen_name", screenName)
+      r.AddCookie(buildCookie("screen_name", screenName))
+    }
+
     path := r.URL.Path
     if path != "/" {
       errorHandler(w, &notFoundError{})
@@ -88,7 +105,7 @@ func tweetTextHtml(t *anaconda.Tweet) string {
   }
 
   for _, user := range t.Entities.User_mentions {
-    htmlA := fmt.Sprintf(`<a href="/user/%s">@%s</a>`, user.Screen_name, user.Screen_name)
+    htmlA := fmt.Sprintf(`<a href="/user?u=%s">@%s</a>`, user.Screen_name, user.Screen_name)
     html = strings.Replace(html, "@" + user.Screen_name, htmlA, -1)
   }
 
@@ -133,6 +150,11 @@ func convertToTweetView(t *anaconda.Tweet, screenName string, showOperator bool)
   tweet.ShowOperator = showOperator
   createdAt, _ := t.CreatedAtTime()
   tweet.CreateTime = timeToReadableString(createdAt)
+
+  // Extract image in tweet
+  for _, media := range t.Entities.Media {
+    tweet.ImageUrl = media.Media_url_https
+  }
   return tweet
 }
 
@@ -151,12 +173,26 @@ func timeToReadableString(t time.Time) string {
   }
 }
 
-func setCookie(w http.ResponseWriter, key string, value string) {
+func buildCookie(key string, value string) *http.Cookie {
   expires := time.Date(2099, time.November, 10, 23, 0, 0, 0, time.UTC)
+  return &http.Cookie{
+      Name: key,
+      Value: value,
+      Expires: expires,
+      Path: "/",
+      HttpOnly: true }
+}
+
+func setCookie(w http.ResponseWriter, key string, value string) {
+  cookie := buildCookie(key, value)
+  http.SetCookie(w, cookie)
+}
+
+func deleteCookie(w http.ResponseWriter, key string) {
   http.SetCookie(w, &http.Cookie{
     Name: key,
-    Value: value,
-    Expires: expires,
+    Value: "deleted",
+    MaxAge: -1,
     Path: "/",
     HttpOnly: true })
 }

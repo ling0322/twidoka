@@ -21,7 +21,9 @@ func main() {
   http.HandleFunc("/", root(signinRequired(partial(timelineHandler, "Home"))))
   http.HandleFunc("/mentions", signinRequired(partial(timelineHandler, "Mentions")))
   http.HandleFunc("/user", signinRequired(partial(timelineHandler, "User")))
+  http.HandleFunc("/search", signinRequired(partial(timelineHandler, "Search")))
   http.HandleFunc("/signin", signInHandler)
+  http.HandleFunc("/signout", signOutHandler)
   http.HandleFunc("/oauth_signin", oauthSignInHandler)
   http.HandleFunc("/update", signinRequired(updateHandler))
   http.HandleFunc("/details", signinRequired(detailsHandler))
@@ -38,12 +40,20 @@ func main() {
   http.ListenAndServe(":8080", nil)
 }
 
+func signOutHandler(w http.ResponseWriter, r *http.Request) {
+  deleteCookie(w, "access_token")
+  deleteCookie(w, "access_token_secret")
+  deleteCookie(w, "screen_name")
+  http.Redirect(w, r, "/", http.StatusFound)
+}
+
 func removeHandler(w http.ResponseWriter, r *http.Request) {
   var err error
   id, err := strconv.ParseInt(r.FormValue("id"), 10, 64)
   confirm := r.FormValue("confirm")
   screenName := getCookie(r, "screen_name")
   api := buildAnacondaApiFromRequest(r)
+  defer api.Close()
 
   if confirm == "" {
     // Not yet confirmed
@@ -53,8 +63,9 @@ func removeHandler(w http.ResponseWriter, r *http.Request) {
     }
     if err == nil {
       view := convertToTweetView(&tweet, screenName, true)
-      fmt.Println(view)
-      removeTemplate.Execute(w, &removeView{Tweet: view})
+      removeTemplate.Execute(w, &removeView{
+          Tweet: view,
+          Referer: r.Referer()})
     }
   } else {
     // Confirmed, remove it!
@@ -62,7 +73,11 @@ func removeHandler(w http.ResponseWriter, r *http.Request) {
       _, err = api.DeleteTweet(id, true)
     }
     if err == nil {
-      http.Redirect(w, r, "/", http.StatusFound)
+      referer := r.FormValue("referer")
+      if referer == "" {
+        referer = "/"
+      }
+      http.Redirect(w, r, referer, http.StatusFound)
     }
   }
 
@@ -77,6 +92,7 @@ func signInHandler(w http.ResponseWriter, r *http.Request) {
 
 func updateHandler(w http.ResponseWriter, r *http.Request) {
   api := buildAnacondaApiFromRequest(r)
+  defer api.Close()
 
   text := r.FormValue("text")
   inReplyTo := r.FormValue("in_reply_to")
@@ -88,7 +104,11 @@ func updateHandler(w http.ResponseWriter, r *http.Request) {
 
   _, err := api.PostTweet(text, values)
   if err == nil {
-    http.Redirect(w, r, "/", http.StatusFound)
+    referer := r.FormValue("referer")
+    if referer == "" {
+      referer = "/"
+    }
+    http.Redirect(w, r, referer, http.StatusFound)
   } else {
     errorHandler(w, err)
   }
@@ -97,6 +117,7 @@ func updateHandler(w http.ResponseWriter, r *http.Request) {
 func composeHandler(composeType string, w http.ResponseWriter, r *http.Request) {
   screenName := getCookie(r, "screen_name")
   api := buildAnacondaApiFromRequest(r)
+  defer api.Close()
 
   var err error
   var id int64
@@ -112,6 +133,7 @@ func composeHandler(composeType string, w http.ResponseWriter, r *http.Request) 
     view := convertToTweetView(&tweet, screenName, true)
     compose := new(composeView)
     compose.ScreenName = screenName
+    compose.Referer = r.Referer()
     switch composeType {
     case "Compose":
       compose.DefaultText = ""
@@ -133,6 +155,7 @@ func composeHandler(composeType string, w http.ResponseWriter, r *http.Request) 
 func detailsHandler(w http.ResponseWriter, r *http.Request) {
   screenName := getCookie(r, "screen_name")
   api := buildAnacondaApiFromRequest(r)
+  defer api.Close()
 
   var err error
   id, err := strconv.ParseInt(r.FormValue("id"), 10, 64)
@@ -153,6 +176,7 @@ func detailsHandler(w http.ResponseWriter, r *http.Request) {
         inReplyToView = convertToTweetView(&inReplyToTweet, screenName, true)
       }
     }
+    view.ShowFull = true
 
     details = new(detailsView)
     details.InReplyTo = inReplyToView
@@ -171,12 +195,15 @@ func detailsHandler(w http.ResponseWriter, r *http.Request) {
 
 func timelineHandler(timelineType string, w http.ResponseWriter, r *http.Request) {
   screenName := getCookie(r, "screen_name")
-  page, _ := strconv.Atoi(r.FormValue("page"))
   api := buildAnacondaApiFromRequest(r)
+  defer api.Close()
   values := buildTimelineRequestValues(r)
 
   // Only in user timeline mode
   userScreenName := r.FormValue("u")
+
+  // Only in search mode
+  query := r.FormValue("q")
 
   // Gets the timeline from twitter.com
   var err error
@@ -189,6 +216,12 @@ func timelineHandler(timelineType string, w http.ResponseWriter, r *http.Request
   case "User":
     values.Add("screen_name", userScreenName)
     timeline, err = api.GetUserTimeline(values)
+  case "Search":
+    if query == "" {
+      timeline = make([]anaconda.Tweet, 0)
+    } else {
+      timeline, err = api.GetSearch(query, values)
+    }
   }
 
   // Only in user timeline mode
@@ -215,11 +248,10 @@ func timelineHandler(timelineType string, w http.ResponseWriter, r *http.Request
     timelineTemplate.Execute(w, &timelineView{
         Title: timelineType,
         ScreenName: screenName,
-        PreviousPage: page - 1,
-        NextPage: page + 1,
         SinceId: lastId,
         User: user,
-        Tweets: tweetViews})
+        Tweets: tweetViews,
+        Search: query})
   }
 
   if err != nil {
@@ -275,9 +307,14 @@ func oauthTokenHandler(w http.ResponseWriter, r *http.Request) {
   if err != nil {
     http.Error(w, err.Error(), http.StatusInternalServerError)
   } else {
-    setCookie(w, "access_token", credentials.Token)
-    setCookie(w, "access_token_secret", credentials.Secret)
-    setCookie(w, "screen_name", values["screen_name"][0])
-    http.Redirect(w, r, "/", http.StatusFound)
+    deleteCookie(w, "access_token")
+    deleteCookie(w, "access_token_secret")
+
+    url := fmt.Sprintf(
+        "?access_token=%s&access_token_secret=%s&screen_name=%s",
+        credentials.Token,
+        credentials.Secret,
+        values["screen_name"][0])
+    http.Redirect(w, r, url, http.StatusFound)
   }
 }
