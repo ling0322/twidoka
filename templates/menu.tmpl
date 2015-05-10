@@ -1,12 +1,14 @@
 <div class="menu">
-  {{ if ne . "Error" }}
-  <a href="/">Timeline</a>
-  <a href="/mentions">@</a>
-  <a href="/compose">&nbsp;+&nbsp;</a>
-  <a href="/search">Search</a>
-  {{ else }}
-  <a href="/">Home</a>
-  {{ end }}
-  <a href="/signout">Sign out</a>
+  <div class="menu-inner">
+    {{ if ne . "Error" }}
+    <a href="/">Timeline</a>
+    <a href="/mentions">@</a>
+    <a href="/compose">&nbsp;+&nbsp;</a>
+    <a href="/search">Search</a>
+    {{ else }}
+    <a href="/">Home</a>
+    {{ end }}
+    <a href="/signout">Sign out</a>
+  </div>
 </div>
 <div class="menu-place"></div>

@@ -103,6 +103,11 @@ hr {
     height: 32px;
 }
 
+.menu-inner {
+    width: 640px;
+    margin: 0 auto;
+}
+
 .c1 {
     padding: 10px 5px;
     width: 640px;
