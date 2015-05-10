@@ -1,5 +1,4 @@
-src/twidoka/config.go
+config.go
 src
 pkg
-!src/twidoka
 nohup.out
