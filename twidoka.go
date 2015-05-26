@@ -26,6 +26,7 @@ func main() {
   http.HandleFunc("/signin", signInHandler)
   http.HandleFunc("/signout", signOutHandler)
   http.HandleFunc("/update", signinRequired(updateHandler))
+  http.HandleFunc("/ajaxupdate", signinRequired(ajaxUpdateHandler))
   http.HandleFunc("/details", signinRequired(detailsHandler))
   http.HandleFunc("/reply", signinRequired(partial(composeHandler, "Reply")))
   http.HandleFunc("/retweet", signinRequired(partial(composeHandler, "Retweet")))
@@ -122,6 +123,27 @@ func updateHandler(w http.ResponseWriter, r *http.Request) {
     http.Redirect(w, r, referer, http.StatusFound)
   } else {
     errorHandler(w, err)
+  }
+}
+
+func ajaxUpdateHandler(w http.ResponseWriter, r *http.Request) {
+  api := buildAnacondaApiFromRequest(r)
+  defer api.Close()
+
+  text := r.FormValue("text")
+  inReplyTo := r.FormValue("in_reply_to")
+
+  values := url.Values{}
+  if inReplyTo != "" {
+    values.Add("in_reply_to_status_id", inReplyTo)
+  }
+
+  _, err := api.PostTweet(text, values)
+  if err == nil {
+    fmt.Fprintf(w, "OK")
+  } else {
+    w.WriteHeader(http.StatusInternalServerError)
+    fmt.Fprintf(w, "error: %s", err)
   }
 }
 

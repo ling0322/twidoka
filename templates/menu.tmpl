@@ -3,12 +3,22 @@
     {{ if ne . "Error" }}
     <a href="/">Timeline</a>
     <a href="/mentions">@</a>
-    <a href="/compose">&nbsp;+&nbsp;</a>
+    <a href="javascript: showComposeBox();">&nbsp;+&nbsp;</a>
     <a href="/search">Search</a>
     {{ else }}
     <a href="/">Home</a>
     {{ end }}
     <a href="/signout">Sign out</a>
+  </div>
+  <div class="c1 compose-box">
+    <form>
+      <div class="divspace"><textarea class="form-control tweet-text" name="text" rows="4"></textarea></div>
+      <div class="divspace status-message"></div>
+      <div class="divspace">
+        <a href="javascript: tweet();"><button type="button" class="btn btn-primary">Tweet</button></a>
+        <a href="javascript: closeComposeBox();"><button type="button" class="btn btn-default">Cancel</button></a>
+      </div>
+    </form>
   </div>
 </div>
 <div class="menu-place"></div>

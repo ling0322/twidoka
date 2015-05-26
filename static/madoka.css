@@ -89,7 +89,6 @@ hr {
     left: 0;
     right: 0;
     background-color: white;
-    height: 32px;
     line-height: 32px;
     border-bottom: 1px solid rgba(0, 0, 0, 0.2);
 }
@@ -109,9 +108,9 @@ hr {
 }
 
 .c1 {
-    padding: 10px 5px;
     width: 640px;
     margin: 0 auto;
+    padding: 10px 5px;
 }
 
 @media only screen and (max-width: 640px) {
@@ -138,4 +137,17 @@ hr {
 
 .content img {
     max-width: 100%;
+}
+
+.compose-box {
+    display: none;
+    padding-top: 0px;
+}
+
+.compose-box a {
+    padding: 0;
+}
+
+.status-message {
+    line-height: 16px;
 }
